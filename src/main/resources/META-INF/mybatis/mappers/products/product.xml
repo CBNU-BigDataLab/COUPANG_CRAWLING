@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.cbnu.bigdatalab.coupangcrawling.repositories.ProductRepository">
+
+	<insert id="save">
+		INSERT INTO `products_crawling` (`productId`,
+								`itemId`,
+								`vendorItemId`,
+								`title`,
+								`reviewCount`,
+								`rating`,
+								`ratingPercentage`,
+								`category`,
+								`색상`,
+								`AS`,
+								`품명_및_모델명`,
+								`품질보증기준`, `제품_소재`, `세탁방법_및_취급시_주의사항`, `정격전압_소비전력`,
+								`무게`, `제조국`, `주요_사양`, `제조자`, `출시년월`, `냉난방면적`, `치수`, `KC`, `제품구성`, `에너지소비효율등급`, `크기`,
+								isSoldOut,
+								salePrice,
+								discountRate,
+								originalPrice,
+								sellingInfo,
+								URL,
+								URLMain)
+		VALUES (
+			#{productId},
+			#{itemId},
+			#{vendorItemId},
+			#{title},
+			#{reviewCount},
+			#{rating},
+			#{ratingPercentage},
+			#{category},
+			#{색상},
+			#{AS},
+			#{품명_및_모델명},
+			#{품질보증기준},
+			#{제품_소재},
+			#{세탁방법_및_취급시_주의사항},
+			#{정격전압_소비전력},
+			#{무게},
+			#{제조국},
+			#{주요_사양},
+			#{제조자},
+			#{출시년월},
+			#{냉난방면적},
+			#{치수},
+			#{KC},
+			#{제품구성},
+			#{에너지소비효율등급},
+			#{크기},
+			#{isSoldOut},
+			#{salePrice},
+			#{discountRate},
+			#{originalPrice},
+			#{sellingInfo},
+			#{URL},
+			#{URLMain});
+	</insert>
+
+	<insert id="saveReviews">
+		INSERT INTO `product_reviews_crawling` ( `productId`,
+										`itemId`,
+										`vendorItemId`,
+									    `reviewer`,
+									    `reviewDate`,
+										`rating`,
+										`productName`,
+										`reviewContent`)
+		VALUES
+		<foreach collection="product.reviews" item="model" index="index" open="(" separator="),("  close=")">
+			#{product.productId},
+			#{product.itemId},
+			#{product.vendorItemId},
+			#{model.reviewer},
+			#{model.reviewDate},
+			#{model.rating},
+			#{model.productName},
+			#{model.reviewContent}
+		</foreach>
+	</insert>
+</mapper>
