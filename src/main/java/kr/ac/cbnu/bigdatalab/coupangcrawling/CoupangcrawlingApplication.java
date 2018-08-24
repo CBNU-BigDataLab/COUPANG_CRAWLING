@@ -31,24 +31,26 @@ public class CoupangcrawlingApplication {
 
 		ProductRepository productRepository = (ProductRepository)context.getBean("productRepository");
 
-		Document totalCountDocument = Jsoup.connect("http://www.coupang.com/np/search?q=계절+가전제품&sorter=scoreDesc&listSize=72").get();
-		Long totalProducts = Long.valueOf(totalCountDocument.select(".hit-count").first().text().replaceAll("'계절 가전제품'에 대한 ","").replaceAll("개의 검색결과","").replaceAll(",",""));
+//		Document totalCountDocument = Jsoup.connect("http://www.coupang.com/np/search?q=계절+가전제품&sorter=scoreDesc&listSize=72").get();
+		Document totalCountDocument = Jsoup.connect("http://www.coupang.com/np/categories/227812?sorter=scoreDesc&listSize=72").get();
+//		Long totalProducts = Long.valueOf(totalCountDocument.select(".hit-count").first().text().replaceAll("'계절 가전제품'에 대한 ","").replaceAll("개의 검색결과","").replaceAll(",",""));
+		Long totalProducts = Long.valueOf(totalCountDocument.select(".newcx-product-total-count").first().text().replaceAll("\\(","").replaceAll("\\)","").replaceAll(",",""));
 		System.out.println("TOTAL PRODUCTS ==> " + totalProducts);
 		Pagination totalProductPagination = new Pagination();
 		totalProductPagination.setLimit(72);
 		totalProductPagination.setTotalCount(totalProducts);
 		System.out.println("TOTAL PAGES ==> " + totalProductPagination.getTotalPages());
 		for(int i = 1; i <= 13; i++) {
-		    String productsURL = "http://www.coupang.com/np/search?q=계절+가전제품&sorter=scoreDesc&listSize=72&page=" + i;
+		    String productsURL = "http://www.coupang.com/np/categories/227812?sorter=scoreDesc&listSize=72&page=" + i;
 		    System.out.println("URL ====> " + productsURL);
 			Document document = Jsoup.connect(productsURL).timeout(1000000).get();
-			Elements productElements = document.select("#productList li a");
+			Elements productElements = document.select("#productList li");
 
 			for (Element productElement : productElements) {
 				try {
 					Product product = new Product();
-					product.setProductId(Long.valueOf(productElement.attr("data-product-id")));
-					product.setItemId(Long.valueOf(productElement.attr("data-item-id")));
+					product.setProductId(Long.valueOf(productElement.select("a").first().attr("data-product-id")));
+					product.setItemId(Long.valueOf(productElement.select("a").first().attr("data-item-id")));
 					product.setVendorItemId(Long.valueOf(productElement.attr("data-vendor-item-id")));
 					product.setCategory(Jsoup.connect("http://www.coupang.com/vp/products/" + product.getProductId() + "/breadcrumb-gnbmenu").get().select("#breadcrumb").text());
 					//System.out.println(product.getCategory());
@@ -60,37 +62,7 @@ public class CoupangcrawlingApplication {
 					product.setReviewCount(data.get("ratingCount").intValue());
 					product.setRating(data.get("ratingAverage"));
 					product.setRatingPercentage(data.get("ratingPercentage"));
-//					String itemsURL = "http://www.coupang.com/vp/products/" + product.getProductId() + "/loadOptions?vendorItemId=" + product.getVendorItemId();
-//					Document itemDocument = Jsoup.connect(itemsURL).get();
-//					Elements itemElements = itemDocument.select("ul li.prod-option-select__item:not([selected])");
-//					for (Element itemElement : itemElements) {
-//						if (itemElement.attr("class").contains("selected")) {
-//							continue;
-//						}
-//						Item item = new Item();
-//						item.setTitle(itemElement.text());
-//						item.setItemId(Long.valueOf(itemElement.attr("data-item-id")));
-//						item.setVendorItemId(Long.valueOf(itemElement.attr("data-vendor-item-id")));
-//						item.setSoldOut(itemElement.hasClass(".soldout"));
-//
-//						String itemURL = "http://www.coupang.com/vp/products/" + product.getProductId() + "/vendor-items/" + item.getVendorItemId() + "/sale-infos/sdp?sdpStyle=undefined";
-//						Document itemDetailsDocument = Jsoup.connect(itemURL).get();
-//						try {
-//							item.setDiscountRate(Double.valueOf(itemDetailsDocument.select(".prod-price__discount").text().replaceAll("%", "").replaceAll(" ", "")));
-//						} catch (Exception ex) {
-//							item.setDiscountRate(0.0);
-//						}
-//						try {
-//							item.setOriginalPrice(Double.valueOf(itemDetailsDocument.select(".prod-original-price").text().replaceAll(",", "").replaceAll("원", "").replaceAll(" ", "")));
-//							item.setSalePrice(Double.valueOf(itemDetailsDocument.select(".prod-price__number").text().replaceAll(",", "").replaceAll("원", "").replaceAll(" ", "")));
-//						} catch (Exception ex) {
-//							item.setOriginalPrice(Double.valueOf(itemDetailsDocument.select("#totalPrice").text().replaceAll(",", "").replaceAll("원", "").replaceAll(" ", "")));
-//							item.setSalePrice(item.getOriginalPrice());
-//						}
-//						item.setSellingInfo(Jsoup.connect("http://www.coupang.com/vp/products/" + product.getProductId() + "/vendor-items/" + product.getVendorItemId() + "/selling-infos?itemId=" + item.getItemId()).get().select(".prod-description-attribute").text());
-//
-//						product.getItems().add(item);
-//					}
+
                     Document productDetailsDocument = Jsoup.connect(product.getProductDetailsPageURL()).get();
                     System.out.println(product.getProductDetailsPageURL());
                     product.setTitle(productDetailsDocument.select(".prod-buy-header__title").first().text());
@@ -100,7 +72,7 @@ public class CoupangcrawlingApplication {
                         product.setOriginalPrice(Double.valueOf(productDetailsDocument.select(".prod-original-price").text().replaceAll(",", "").replaceAll("원", "").replaceAll(" ", "")));
                         product.setSalePrice(Double.valueOf(productDetailsDocument.select(".prod-price__number").text().replaceAll(",", "").replaceAll("원", "").replaceAll(" ", "")));
                     } catch (Exception ex) {
-                        product.setOriginalPrice(Double.valueOf(productDetailsDocument.select("#totalPrice").text().replaceAll(",", "").replaceAll("원", "").replaceAll(" ", "")));
+                        product.setOriginalPrice(Double.valueOf(productDetailsDocument.select(".total-price").text().replaceAll(",", "").replaceAll("원", "").replaceAll(" ", "")));
                         product.setSalePrice(product.getOriginalPrice());
                     }
                     product.setSellingInfo(Jsoup.connect("http://www.coupang.com/vp/products/" + product.getProductId() + "/vendor-items/" + product.getVendorItemId() + "/selling-infos").get().select(".prod-description-attribute").text());

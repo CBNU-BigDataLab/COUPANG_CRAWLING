@@ -21,8 +21,9 @@ public class CoupangMain {
 
     public static void main(String args[]) throws IOException {
 
-        Document totalCountDocument = Jsoup.connect("http://www.coupang.com/np/search?q=계절+가전제품&sorter=scoreDesc&listSize=72").get();
-        Long totalProducts = Long.valueOf(totalCountDocument.select(".hit-count").first().text().replaceAll("'계절 가전제품'에 대한 ","").replaceAll("개의 검색결과","").replaceAll(",",""));
+//        Document totalCountDocument = Jsoup.connect("http://www.coupang.com/np/search?q=계절+가전제품&sorter=scoreDesc&listSize=72").get();
+        Document totalCountDocument = Jsoup.connect("http://www.coupang.com/np/categories/227812?sorter=scoreDesc&listSize=72").get();
+        Long totalProducts = Long.valueOf(totalCountDocument.select(".newcx-product-total-count").first().text().replaceAll("\\(","").replaceAll("\\)","").replaceAll(",",""));
         Pagination totalProductPagination = new Pagination();
         totalProductPagination.setLimit(72);
         totalProductPagination.setTotalCount(totalProducts);
@@ -128,6 +129,7 @@ public class CoupangMain {
                             review.setProductName(reviewArticle.select(".sdp-review__article__list__info__product-info__name").text());
                             review.setReviewContent(reviewArticle.select(".sdp-review__article__list__review__content").text());
                             product.getReviews().add(review);
+                            System.out.println(review);
                         }
                     }
                 } catch (Exception ex) {

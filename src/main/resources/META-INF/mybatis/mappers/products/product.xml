@@ -3,7 +3,7 @@
 <mapper namespace="kr.ac.cbnu.bigdatalab.coupangcrawling.repositories.ProductRepository">
 
 	<insert id="save">
-		INSERT INTO `products_crawling` (`productId`,
+		INSERT INTO `products` (`productId`,
 								`itemId`,
 								`vendorItemId`,
 								`title`,
@@ -60,7 +60,7 @@
 	</insert>
 
 	<insert id="saveReviews">
-		INSERT INTO `product_reviews_crawling` ( `productId`,
+		INSERT INTO `product_reviews` ( `productId`,
 										`itemId`,
 										`vendorItemId`,
 									    `reviewer`,
